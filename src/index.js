@@ -1,11 +1,8 @@
 
-// npm install @alchemy-sdk
 import { Network, Alchemy, Utils } from "alchemy-sdk";
 import { WebhookClient } from 'discord.js';
-// import { webhookId, webhookToken } from './config.json';
 import * as dotenv from 'dotenv';
 dotenv.config();
-
 
 const webhookClient = new WebhookClient(
     {
@@ -16,21 +13,20 @@ const webhookClient = new WebhookClient(
 
 const settings = {
     apiKey: process.env.API_KEY,
-    network: Network.ETH_GOERLI
+    network: Network.ETH_MAINNET
 };
 
 const alchemy = new Alchemy(settings);
 
-const nftContractAddress = "0x96BEfFc337281C439BE26AA272c16A7D3a4836B5";
+const nftContractAddress = "0x21b2fB6E88081b8D250A22Af2acA797457f09C71";
 
-const hackrDaoMintEvents = {
+const buyWithWalletEvent = {
     address: nftContractAddress,
-    topics: ["0x66fce252103f2018c6e48a00714ea63977ba2985af37d39e9d98ff17fef6986b"],
+    topics: ["0x7534e9c9396820aad756ba27f82162930f80bef863aabdf311e7dce26a79bccd"],
 };
 
-const doSomethingWithTxn = async (txn) => {
+const walletTxn = async (txn) => {
     const tx = await alchemy.core.getTransactionReceipt(txn.transactionHash)
-    console.log('tx', tx)
     if (tx.status === 1)
         webhookClient.send({
             content: `${txn.transactionHash}. ${tx.logs.length - 1} NFTs with ${Utils.formatUnits(parseInt(tx.gasUsed._hex).toString(), 9)} ether net fee`,
@@ -39,6 +35,6 @@ const doSomethingWithTxn = async (txn) => {
         });
 }
 
-alchemy.ws.on(hackrDaoMintEvents, doSomethingWithTxn);
+alchemy.ws.on(buyWithWalletEvent, walletTxn);
 
 
